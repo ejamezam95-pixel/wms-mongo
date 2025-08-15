@@ -1,23 +1,11 @@
 {
-  "users": [
-    {
-      "id": "admin",
-      "username": "admin",
-      "password": "1234"
-    }
-  ],
-  "stock": [
-    {
-      "id": "item1",
-      "name": "Item One",
-      "quantity": 10
-    },
-    {
-      "id": "item2",
-      "name": "Item Two",
-      "quantity": 5
-    }
-  ],
-  "inbound": [],
-  "outbound": []
+    "users": [
+        { "id": "admin", "username": "admin", "password": "1234" }
+    ],
+    "stock": [
+        { "id": "item1", "name": "Item One", "quantity": 10 },
+        { "id": "item2", "name": "Item Two", "quantity": 5 }
+    ],
+    "inbound": [],
+    "outbound": []
 }
