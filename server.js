@@ -20,16 +20,31 @@ await db.read();
 db.data ||= { stock: [], inbound: [], outbound: [] };
 
 // ====================
+// ROOT ROUTE
+// ====================
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>Welcome to WMS API!</h1>
+    <p>Available endpoints:</p>
+    <ul>
+      <li>GET /stock</li>
+      <li>POST /stock/:id</li>
+      <li>GET /inbound</li>
+      <li>POST /inbound</li>
+      <li>GET /outbound</li>
+      <li>POST /outbound</li>
+    </ul>
+  `);
+});
+
+// ====================
 // INBOUND ROUTES
 // ====================
-
-// Get all inbound records
 app.get('/inbound', async (req, res) => {
   await db.read();
   res.json(db.data.inbound);
 });
 
-// Add new inbound record
 app.post('/inbound', async (req, res) => {
   const newInbound = req.body;
   db.data.inbound.push(newInbound);
@@ -49,18 +64,16 @@ app.post('/inbound', async (req, res) => {
 // ====================
 // STOCK ROUTES
 // ====================
-
-// Get all stock
 app.get('/stock', async (req, res) => {
   await db.read();
   res.json(db.data.stock);
 });
 
-// Update stock quantity manually
 app.put('/stock/:id', async (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
   await db.read();
+
   const stockItem = db.data.stock.find(item => item.id === id);
   if (!stockItem) return res.status(404).json({ error: 'Item not found' });
 
@@ -72,14 +85,11 @@ app.put('/stock/:id', async (req, res) => {
 // ====================
 // OUTBOUND ROUTES
 // ====================
-
-// Get all outbound records
 app.get('/outbound', async (req, res) => {
   await db.read();
   res.json(db.data.outbound);
 });
 
-// Add outbound record (reduce stock)
 app.post('/outbound', async (req, res) => {
   const newOutbound = req.body;
   await db.read();
@@ -97,7 +107,7 @@ app.post('/outbound', async (req, res) => {
 });
 
 // ====================
-// SERVER
+// START SERVER
 // ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
