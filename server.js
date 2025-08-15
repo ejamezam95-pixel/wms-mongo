@@ -2,19 +2,29 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
+import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 10000;
 
 app.use(bodyParser.json());
 
-// --- LowDB setup dengan default data ---
 const dbFile = './src/db.json';
-const adapter = new JSONFile(dbFile);
 
-const defaultData = {
+// Pastikan fail db.json wujud
+if (!fs.existsSync(dbFile)) {
+    fs.writeFileSync(dbFile, '{}');
+}
+
+const adapter = new JSONFile(dbFile);
+const db = new Low(adapter);
+
+await db.read();
+
+// Set default data jika db.json kosong
+db.data ||= {
     users: [
-        { id: 'admin', username: 'admin', password: '1234' } // login guna ni
+        { id: 'admin', username: 'admin', password: '1234' }
     ],
     stock: [
         { id: 'item1', name: 'Item One', quantity: 10 },
@@ -24,13 +34,9 @@ const defaultData = {
     outbound: []
 };
 
-const db = new Low(adapter, defaultData);
-
-// Pastikan db.json wujud dengan default data
-await db.read();
 await db.write();
 
-// --- Login endpoint ---
+// Login endpoint
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     await db.read();
@@ -39,7 +45,7 @@ app.post('/login', async (req, res) => {
     else res.status(401).json({ success: false, message: 'Invalid username or password' });
 });
 
-// --- Stock endpoints ---
+// Stock endpoints
 app.get('/stock', async (req, res) => {
     await db.read();
     res.json(db.data.stock);
@@ -56,7 +62,7 @@ app.put('/stock/:id', async (req, res) => {
     res.json(item);
 });
 
-// --- Inbound endpoints ---
+// Inbound endpoints
 app.get('/inbound', async (req, res) => {
     await db.read();
     res.json(db.data.inbound);
@@ -71,7 +77,7 @@ app.post('/inbound', async (req, res) => {
     res.json(newItem);
 });
 
-// --- Outbound endpoints ---
+// Outbound endpoints
 app.get('/outbound', async (req, res) => {
     await db.read();
     res.json(db.data.outbound);
@@ -89,5 +95,4 @@ app.post('/outbound', async (req, res) => {
     res.json({ id: item.id, name: item.name, quantity });
 });
 
-// --- Start server ---
 app.listen(port, () => console.log(`WMS Server running on port ${port}`));
