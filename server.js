@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import { Low, JSONFile } from 'lowdb';
 import path from 'path';
@@ -10,7 +9,6 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Setup database
 const dbFile = path.join(__dirname, 'db.json');
 const adapter = new JSONFile(dbFile);
 const db = new Low(adapter, { stock: [], inbound: [], outbound: [] });
@@ -18,9 +16,7 @@ const db = new Low(adapter, { stock: [], inbound: [], outbound: [] });
 await db.read();
 db.data ||= { stock: [], inbound: [], outbound: [] };
 
-// ====================
-// ROOT ROUTE
-// ====================
+// ROOT route
 app.get('/', (req, res) => {
   res.send(`
     <h1>Welcome to Warehouse Management System (WMS) API!</h1>
@@ -36,9 +32,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// ====================
-// INBOUND ROUTES
-// ====================
+// INBOUND
 app.get('/inbound', async (req, res) => {
   await db.read();
   res.json(db.data.inbound);
@@ -49,19 +43,14 @@ app.post('/inbound', async (req, res) => {
   db.data.inbound.push(newInbound);
 
   const existingStock = db.data.stock.find(item => item.id === newInbound.id);
-  if (existingStock) {
-    existingStock.quantity += newInbound.quantity;
-  } else {
-    db.data.stock.push({ ...newInbound });
-  }
+  if (existingStock) existingStock.quantity += newInbound.quantity;
+  else db.data.stock.push({ ...newInbound });
 
   await db.write();
   res.status(201).json(newInbound);
 });
 
-// ====================
-// STOCK ROUTES
-// ====================
+// STOCK
 app.get('/stock', async (req, res) => {
   await db.read();
   res.json(db.data.stock);
@@ -80,9 +69,7 @@ app.put('/stock/:id', async (req, res) => {
   res.json(stockItem);
 });
 
-// ====================
-// OUTBOUND ROUTES
-// ====================
+// OUTBOUND
 app.get('/outbound', async (req, res) => {
   await db.read();
   res.json(db.data.outbound);
@@ -104,9 +91,7 @@ app.post('/outbound', async (req, res) => {
   res.status(201).json(newOutbound);
 });
 
-// ====================
 // START SERVER
-// ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`WMS Server running on port ${PORT}`);
