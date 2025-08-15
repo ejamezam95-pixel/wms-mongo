@@ -1,4 +1,3 @@
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import { Low } from 'lowdb';
@@ -9,14 +8,27 @@ const port = process.env.PORT || 10000;
 
 app.use(bodyParser.json());
 
-const dbFile = './src/db.json';
+// --- LowDB setup ---
+const dbFile = './src/db.json'; // pastikan path db.json betul
 const adapter = new JSONFile(dbFile);
 const db = new Low(adapter);
 
+// --- Default data ---
 await db.read();
-db.data ||= { users: [], stock: [], inbound: [], outbound: [] };
+db.data ||= { 
+    users: [
+        { id: 'admin', username: 'admin', password: '1234' } // login boleh guna
+    ],
+    stock: [
+        { id: 'item1', name: 'Item One', quantity: 10 },
+        { id: 'item2', name: 'Item Two', quantity: 5 }
+    ],
+    inbound: [],
+    outbound: []
+};
+await db.write(); // simpan default data jika kosong
 
-// Login endpoint
+// --- Login endpoint ---
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     await db.read();
@@ -25,7 +37,7 @@ app.post('/login', async (req, res) => {
     else res.status(401).json({ success: false, message: 'Invalid username or password' });
 });
 
-// Stock endpoints
+// --- Stock endpoints ---
 app.get('/stock', async (req, res) => {
     await db.read();
     res.json(db.data.stock);
@@ -42,7 +54,7 @@ app.put('/stock/:id', async (req, res) => {
     res.json(item);
 });
 
-// Inbound endpoints
+// --- Inbound endpoints ---
 app.get('/inbound', async (req, res) => {
     await db.read();
     res.json(db.data.inbound);
@@ -57,7 +69,7 @@ app.post('/inbound', async (req, res) => {
     res.json(newItem);
 });
 
-// Outbound endpoints
+// --- Outbound endpoints ---
 app.get('/outbound', async (req, res) => {
     await db.read();
     res.json(db.data.outbound);
@@ -75,4 +87,5 @@ app.post('/outbound', async (req, res) => {
     res.json({ id: item.id, name: item.name, quantity });
 });
 
+// --- Start server ---
 app.listen(port, () => console.log(`WMS Server running on port ${port}`));
