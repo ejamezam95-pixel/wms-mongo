@@ -1,8 +1,23 @@
 {
   "users": [
-    { "id": "admin", "username": "admin", "password": "1234" }
+    {
+      "id": "admin",
+      "username": "admin",
+      "password": "1234"
+    }
   ],
-  "stock": [],
+  "stock": [
+    {
+      "id": "item1",
+      "name": "Item One",
+      "quantity": 10
+    },
+    {
+      "id": "item2",
+      "name": "Item Two",
+      "quantity": 5
+    }
+  ],
   "inbound": [],
   "outbound": []
 }
