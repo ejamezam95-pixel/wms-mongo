@@ -8,16 +8,13 @@ const port = process.env.PORT || 10000;
 
 app.use(bodyParser.json());
 
-// --- LowDB setup ---
-const dbFile = './src/db.json'; // pastikan path db.json betul
+// --- LowDB setup dengan default data ---
+const dbFile = './src/db.json';
 const adapter = new JSONFile(dbFile);
-const db = new Low(adapter);
 
-// --- Default data ---
-await db.read();
-db.data ||= { 
+const defaultData = {
     users: [
-        { id: 'admin', username: 'admin', password: '1234' } // login boleh guna
+        { id: 'admin', username: 'admin', password: '1234' } // login guna ni
     ],
     stock: [
         { id: 'item1', name: 'Item One', quantity: 10 },
@@ -26,7 +23,12 @@ db.data ||= {
     inbound: [],
     outbound: []
 };
-await db.write(); // simpan default data jika kosong
+
+const db = new Low(adapter, defaultData);
+
+// Pastikan db.json wujud dengan default data
+await db.read();
+await db.write();
 
 // --- Login endpoint ---
 app.post('/login', async (req, res) => {
