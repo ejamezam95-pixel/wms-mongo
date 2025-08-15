@@ -9,19 +9,23 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Database setup
 const dbFile = path.join(__dirname, 'db.json');
 const adapter = new JSONFile(dbFile);
-const db = new Low(adapter, { stock: [], inbound: [], outbound: [] });
+const db = new Low(adapter, { users: [], stock: [], inbound: [], outbound: [] });
 
 await db.read();
-db.data ||= { stock: [], inbound: [], outbound: [] };
+db.data ||= { users: [], stock: [], inbound: [], outbound: [] };
 
-// ROOT route
+// ====================
+// ROOT ROUTE
+// ====================
 app.get('/', (req, res) => {
   res.send(`
     <h1>Welcome to Warehouse Management System (WMS) API!</h1>
     <p>Available endpoints:</p>
     <ul>
+      <li>POST /login</li>
       <li>GET /stock</li>
       <li>PUT /stock/:id</li>
       <li>GET /inbound</li>
@@ -32,7 +36,20 @@ app.get('/', (req, res) => {
   `);
 });
 
-// INBOUND
+// ====================
+// LOGIN ROUTE
+// ====================
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  await db.read();
+  const user = db.data.users.find(u => u.username === username && u.password === password);
+  if (user) return res.json({ success: true, message: 'Login successful' });
+  res.status(401).json({ success: false, message: 'Invalid username or password' });
+});
+
+// ====================
+// INBOUND ROUTES
+// ====================
 app.get('/inbound', async (req, res) => {
   await db.read();
   res.json(db.data.inbound);
@@ -50,7 +67,9 @@ app.post('/inbound', async (req, res) => {
   res.status(201).json(newInbound);
 });
 
-// STOCK
+// ====================
+// STOCK ROUTES
+// ====================
 app.get('/stock', async (req, res) => {
   await db.read();
   res.json(db.data.stock);
@@ -69,7 +88,9 @@ app.put('/stock/:id', async (req, res) => {
   res.json(stockItem);
 });
 
-// OUTBOUND
+// ====================
+// OUTBOUND ROUTES
+// ====================
 app.get('/outbound', async (req, res) => {
   await db.read();
   res.json(db.data.outbound);
@@ -91,8 +112,10 @@ app.post('/outbound', async (req, res) => {
   res.status(201).json(newOutbound);
 });
 
+// ====================
 // START SERVER
+// ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`WMS Server running on port ${PORT}`);
+  console.log(`WMS Server with Login running on port ${PORT}`);
 });
