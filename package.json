@@ -1,18 +1,23 @@
 {
   "name": "warehouse-management-system",
   "version": "1.0.0",
-  "description": "Minimal warehouse management system (demo).",
+  "description": "Warehouse Management System (WMS) using Node.js, Express, and LowDB",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "lowdb": "^6.0.1",
-    "bcrypt": "^5.1.0",
-    "jsonwebtoken": "^9.0.0",
-    "cors": "^2.8.5",
-    "body-parser": "^1.20.2",
-    "shortid": "^2.2.16"
-  }
+    "lowdb": "^3.0.0"
+  },
+  "keywords": [
+    "WMS",
+    "warehouse",
+    "nodejs",
+    "express",
+    "lowdb"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
