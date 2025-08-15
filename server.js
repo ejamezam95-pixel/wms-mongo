@@ -1,9 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import fs from 'fs';
-import path from 'path';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 const port = process.env.PORT || 10000;
@@ -17,26 +17,21 @@ const dbDir = path.dirname(dbFile);
 // Pastikan folder wujud
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
-// Pastikan db.json wujud dan ada default data
-if (!fs.existsSync(dbFile)) {
-  fs.writeFileSync(dbFile, JSON.stringify({
-    users: [{ id: 'admin', username: 'admin', password: '1234' }],
-    stock: [
-      { id: 'item1', name: 'Item One', quantity: 10 },
-      { id: 'item2', name: 'Item Two', quantity: 5 }
-    ],
-    inbound: [],
-    outbound: []
-  }, null, 2));
-}
-
-// Setup LowDB
+// Setup LowDB dengan default data terus
 const adapter = new JSONFile(dbFile);
-const db = new Low(adapter);
+const db = new Low(adapter, {
+  users: [{ id: 'admin', username: 'admin', password: '1234' }],
+  stock: [
+    { id: 'item1', name: 'Item One', quantity: 10 },
+    { id: 'item2', name: 'Item Two', quantity: 5 }
+  ],
+  inbound: [],
+  outbound: []
+});
+
 await db.read();
 
 // --- Endpoints ---
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   await db.read();
