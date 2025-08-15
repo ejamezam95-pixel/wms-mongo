@@ -24,11 +24,11 @@ db.data ||= { stock: [], inbound: [], outbound: [] };
 // ====================
 app.get('/', (req, res) => {
   res.send(`
-    <h1>Welcome to WMS API!</h1>
-    <p>Available endpoints:</p>
+    <h1>Selamat datang ke Warehouse Management System (WMS) API!</h1>
+    <p>Senarai endpoint tersedia:</p>
     <ul>
       <li>GET /stock</li>
-      <li>POST /stock/:id</li>
+      <li>PUT /stock/:id</li>
       <li>GET /inbound</li>
       <li>POST /inbound</li>
       <li>GET /outbound</li>
@@ -38,7 +38,7 @@ app.get('/', (req, res) => {
 });
 
 // ====================
-// INBOUND ROUTES
+// ROUTE INBOUND
 // ====================
 app.get('/inbound', async (req, res) => {
   await db.read();
@@ -49,7 +49,7 @@ app.post('/inbound', async (req, res) => {
   const newInbound = req.body;
   db.data.inbound.push(newInbound);
 
-  // Update stock automatically
+  // Update stok automatik
   const existingStock = db.data.stock.find(item => item.id === newInbound.id);
   if (existingStock) {
     existingStock.quantity += newInbound.quantity;
@@ -62,7 +62,7 @@ app.post('/inbound', async (req, res) => {
 });
 
 // ====================
-// STOCK ROUTES
+// ROUTE STOCK
 // ====================
 app.get('/stock', async (req, res) => {
   await db.read();
@@ -75,7 +75,7 @@ app.put('/stock/:id', async (req, res) => {
   await db.read();
 
   const stockItem = db.data.stock.find(item => item.id === id);
-  if (!stockItem) return res.status(404).json({ error: 'Item not found' });
+  if (!stockItem) return res.status(404).json({ error: 'Item tidak ditemui' });
 
   stockItem.quantity = quantity;
   await db.write();
@@ -83,7 +83,7 @@ app.put('/stock/:id', async (req, res) => {
 });
 
 // ====================
-// OUTBOUND ROUTES
+// ROUTE OUTBOUND
 // ====================
 app.get('/outbound', async (req, res) => {
   await db.read();
@@ -96,7 +96,7 @@ app.post('/outbound', async (req, res) => {
 
   const stockItem = db.data.stock.find(item => item.id === newOutbound.id);
   if (!stockItem || stockItem.quantity < newOutbound.quantity) {
-    return res.status(400).json({ error: 'Not enough stock' });
+    return res.status(400).json({ error: 'Stok tidak mencukupi' });
   }
 
   stockItem.quantity -= newOutbound.quantity;
@@ -111,5 +111,5 @@ app.post('/outbound', async (req, res) => {
 // ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`WMS Server running on port ${PORT}`);
+  console.log(`Server WMS berjalan di port ${PORT}`);
 });
