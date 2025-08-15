@@ -1,4 +1,7 @@
 {
+  "users": [
+    { "id": "admin", "username": "admin", "password": "1234" }
+  ],
   "stock": [],
   "inbound": [],
   "outbound": []
