@@ -1,7 +1,6 @@
 // server.js
 import express from 'express';
-import { Low } from 'lowdb';
-import { JSONFile } from 'lowdb/node';
+import { Low, JSONFile } from 'lowdb';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,7 +13,7 @@ const __dirname = path.dirname(__filename);
 // Setup database
 const dbFile = path.join(__dirname, 'db.json');
 const adapter = new JSONFile(dbFile);
-const db = new Low(adapter, { stock: [], inbound: [], outbound: [] }); // default data
+const db = new Low(adapter, { stock: [], inbound: [], outbound: [] });
 
 await db.read();
 db.data ||= { stock: [], inbound: [], outbound: [] };
@@ -24,8 +23,8 @@ db.data ||= { stock: [], inbound: [], outbound: [] };
 // ====================
 app.get('/', (req, res) => {
   res.send(`
-    <h1>Selamat datang ke Warehouse Management System (WMS) API!</h1>
-    <p>Senarai endpoint tersedia:</p>
+    <h1>Welcome to Warehouse Management System (WMS) API!</h1>
+    <p>Available endpoints:</p>
     <ul>
       <li>GET /stock</li>
       <li>PUT /stock/:id</li>
@@ -38,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 // ====================
-// ROUTE INBOUND
+// INBOUND ROUTES
 // ====================
 app.get('/inbound', async (req, res) => {
   await db.read();
@@ -49,7 +48,6 @@ app.post('/inbound', async (req, res) => {
   const newInbound = req.body;
   db.data.inbound.push(newInbound);
 
-  // Update stok automatik
   const existingStock = db.data.stock.find(item => item.id === newInbound.id);
   if (existingStock) {
     existingStock.quantity += newInbound.quantity;
@@ -62,7 +60,7 @@ app.post('/inbound', async (req, res) => {
 });
 
 // ====================
-// ROUTE STOCK
+// STOCK ROUTES
 // ====================
 app.get('/stock', async (req, res) => {
   await db.read();
@@ -75,7 +73,7 @@ app.put('/stock/:id', async (req, res) => {
   await db.read();
 
   const stockItem = db.data.stock.find(item => item.id === id);
-  if (!stockItem) return res.status(404).json({ error: 'Item tidak ditemui' });
+  if (!stockItem) return res.status(404).json({ error: 'Item not found' });
 
   stockItem.quantity = quantity;
   await db.write();
@@ -83,7 +81,7 @@ app.put('/stock/:id', async (req, res) => {
 });
 
 // ====================
-// ROUTE OUTBOUND
+// OUTBOUND ROUTES
 // ====================
 app.get('/outbound', async (req, res) => {
   await db.read();
@@ -96,7 +94,7 @@ app.post('/outbound', async (req, res) => {
 
   const stockItem = db.data.stock.find(item => item.id === newOutbound.id);
   if (!stockItem || stockItem.quantity < newOutbound.quantity) {
-    return res.status(400).json({ error: 'Stok tidak mencukupi' });
+    return res.status(400).json({ error: 'Not enough stock' });
   }
 
   stockItem.quantity -= newOutbound.quantity;
@@ -111,5 +109,5 @@ app.post('/outbound', async (req, res) => {
 // ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server WMS berjalan di port ${PORT}`);
+  console.log(`WMS Server running on port ${PORT}`);
 });
