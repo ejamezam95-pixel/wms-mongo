@@ -1,4 +1,5 @@
 {
-  "users": [],
-  "items": []
+  "stock": [],
+  "inbound": [],
+  "outbound": []
 }
